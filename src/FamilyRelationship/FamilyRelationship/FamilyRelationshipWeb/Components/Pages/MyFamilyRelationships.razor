@@ -1,0 +1,88 @@
+﻿@page "/myFamily"
+@page "/myFamily/{FamilyId:int}"
+
+@using FamilyRelationshipDataAccess
+@using FamilyRelationshipDomain
+
+@rendermode InteractiveServer
+
+@inject IFamilyMember FamilyService
+
+@if (Family != null)
+{
+    <h3>@Family.FamilyName - Relationships</h3>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                @foreach (var member in Family.FamilyMembers)
+                {
+                    <th>@member.FamilyMemberName</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var memberRow in Family.FamilyMembers)
+            {
+                <tr>
+                    <td>@memberRow.FamilyMemberName</td>
+                    @foreach (var memberCol in Family.FamilyMembers)
+                    {
+                        <td>
+                            @if (memberRow.Id == memberCol.Id)
+                            {
+                                <span>Self</span>
+                            }
+                            else
+                            {
+                                <select @onchange="async (e) => await OnRelationshipChanged(memberRow.Id, memberCol.Id, (RelationshipType)Enum.Parse(typeof(RelationshipType), e.Value.ToString()))"
+                                        value="@GetRelationship(memberRow.Id, memberCol.Id)">
+                                    @foreach (var relationshipType in Enum.GetValues(typeof(RelationshipType)))
+                                    {
+                                        <option value="@relationshipType">@relationshipType</option>
+                                    }
+                                </select>
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+    
+}
+
+
+@code {
+    [Parameter]
+    public int FamilyId { get; set; }
+
+    private Family Family { get; set; } 
+
+    protected override async Task OnInitializedAsync()
+    {
+        Family = new()
+            {
+                FamilyMembers = new List<FamilyMember>()
+            };
+
+        Family = await FamilyService.GetFamilyByIdAsync(FamilyId);
+    }
+
+    private RelationshipType GetRelationship(int memberFromId, int memberToId)
+    {
+        var relationship = Family.FamilyRelationships
+            .FirstOrDefault(r => r.FamilyMemberFromId == memberFromId && r.FamilyMemberToId == memberToId);
+
+        return relationship != null ? relationship.Relationship : RelationshipType.None;
+    }
+
+    private async Task OnRelationshipChanged(int memberFromId, int memberToId, RelationshipType newRelationship)
+    {
+        await FamilyService.UpdateRelationshipAsync(FamilyId, memberFromId, memberToId, newRelationship);
+
+        // Optional: Refresh the Family object after update
+        Family = await FamilyService.GetFamilyByIdAsync(FamilyId);
+    }
+}

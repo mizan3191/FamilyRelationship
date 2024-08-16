@@ -20,3 +20,28 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
+
+# Build and Release Folders
+bin-debug/
+bin-release/
+[Oo]bj/
+[Bb]in/
+
+# Other files and folders
+.settings/
+
+# Executables
+*.swf
+*.air
+*.ipa
+*.apk
+
+# Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
+# should NOT be excluded as they contain compiler settings and other important
+# information for Eclipse / Flash Builder.
+SRC/MITInventory/.vs/MITInventory/FileContentIndex/63b3766b-e1c4-4137-8d00-a0203a06f859.vsidx
+*.vsidx
+*.bin
+*.v2
+SRC/MITInventory/.vs/MITInventory/v17/.suo
+
